@@ -8,6 +8,7 @@ const char* password = "12345678b";
 
 // Enlace Ngrok con HTTP (no HTTPS)
 const char* serverName = "http://9e4f-186-163-11-16.ngrok-free.app/api/posicion";
+// Este link me genera el programa NGROK cuando lo genero el tunel desde mi ordenador
 
 WiFiClient client;
 
