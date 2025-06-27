@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mapa de Tracking en Lima</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>#map { height: 100vh; }</style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([-12.0464, -77.0428], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    let puntos = [];
+    let linea = null;
+
+    function agregarPunto(lat, lng) {
+      const punto = L.circleMarker([lat, lng], {
+        radius: 6,
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.8
+      }).addTo(map);
+
+      puntos.push([lat, lng]);
+
+      // Centrar en el último punto
+      map.setView([lat, lng]);
+
+      // Dibujar línea
+      if (linea) {
+        map.removeLayer(linea);
+      }
+      linea = L.polyline(puntos, { color: 'blue' }).addTo(map);
+    }
+
+    setInterval(async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/posicion');
+        const data = await response.json();
+
+        // Limpia puntos previos (solo los círculos)
+        map.eachLayer(layer => {
+          if (layer instanceof L.CircleMarker) {
+            map.removeLayer(layer);
+          }
+        });
+
+        // Reinicia la lista de puntos
+        puntos = [];
+
+        // Agrega y conecta
+        data.forEach(p => agregarPunto(p.lat, p.lng));
+      } catch (err) {
+        console.error("Error al obtener puntos:", err);
+      }
+    }, 10000);
+  </script>
+</body>
+</html>
